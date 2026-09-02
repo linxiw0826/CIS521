@@ -114,7 +114,7 @@ def digits_to_words(text):
 
 
 def to_mixed_case(name):
-    parts = [word for word in name.split("_") if word]
+    parts = name.split("_")
     if not parts:
         return ""
     first = parts[0].lower()
@@ -135,13 +135,13 @@ class Polynomial(object):
         return self.polynomial
 
     def __neg__(self):
-        return Polynomial([(-coef, power) for (coef, power) in self.polynomial])
+        return Polynomial(tuple((-coef, power) for (coef, power) in self.polynomial))
 
     def __add__(self, other):
         return Polynomial(self.polynomial + other.polynomial)
 
     def __sub__(self, other):
-        return Polynomial(self.polynomial + [(-coef, power) for (coef, power) in other.polynomial])
+        return Polynomial(self.polynomial + tuple((-coef, power) for (coef, power) in other.polynomial))
 
     def __mul__(self, other):
         return Polynomial((coef * other_coef, pwr + other_pwr)
