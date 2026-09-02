@@ -127,11 +127,11 @@ def digits_to_words(text):
 
 
 def to_mixed_case(name):
-    parts = name.split("_")
+    parts = [word for word in name.split("_") if word]
     if not parts:
         return ""
     first = parts[0].lower()
-    rest = "".join(word.capitalize() for word in parts[1:] if word)
+    rest = "".join(word.capitalize() for word in parts[1:])
     return f"{first}{rest}"
 
 ############################################################
