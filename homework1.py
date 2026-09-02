@@ -9,25 +9,38 @@ import string
 student_name = "Linxi Wu"
 
 # This is where your grade report will be sent.
-student_email = "linxiw@engineering.penn.edu" 
+student_email = "linxiw@engineering.penn.edu"
 
 ############################################################
 # Section 1: Python Concepts
 ############################################################
 
-python_concepts_question_1 = """Python is strongly typed because every object has a fixed type and values of
-incompatible types cannot be mixed directly without explicit conversion. For example,
-2+3 raises a TypeError. Python is dynamically typed because variable names are bound to objects at runtime and
-the type of a variable can change over time. For example, assigning `x = 1` and then
-`x = 'hello'` is valid because `x` is just a name that can refer to different types."""
+python_concepts_question_1 = (
+    "Python is strongly typed because every object has a fixed type and "
+    "values of "
+    "incompatible types cannot be mixed directly without "
+    "explicit conversion.\n"
+    "For example, 2+3 raises a TypeError. Python is dynamically typed because "
+    "variable names are bound to objects at runtime and "
+    "the type of a variable can "
+    "change over time.\n"
+    "For example, assigning `x = 1` and then `x = 'hello'` is valid because "
+    "`x` is just a name that can refer to different types."
+)
 
-python_concepts_question_2 = """Dictionary keys in Python must be immutable. Lists are not immutable
-so they cannot be used as dictionary keys. A fix is to use immutable tuples for points, e.g. {(0, 0): 'home', (1, 2): 'school', (-1, 1): 'market'}."""
+python_concepts_question_2 = (
+    "Dictionary keys in Python must be immutable. Lists are not immutable "
+    "so they cannot be used as dictionary keys. A fix is to use immutable "
+    "tuples for points, e.g. {"
+    "(0, 0): 'home', (1, 2): 'school', (-1, 1): 'market'}."
+)
 
-python_concepts_question_3 = """The `''.join(strings)` version is faster for large inputs because string
-concatenation with `+=` builds many temporary string objects (O(n^2) behavior in the
-aggregate due to repeated copying). `join` precomputes the total size and builds the
-result in one pass."""
+python_concepts_question_3 = (
+    "The `''.join(strings)` version is faster for large inputs because "
+    "string concatenation with `+=` builds many temporary string objects "
+    "(O(n^2) behavior in the aggregate) due to repeated copying). "
+    "`join` precomputes the total size and builds the result in one pass."
+)
 
 ############################################################
 # Section 2: Working with Lists
@@ -118,7 +131,7 @@ def to_mixed_case(name):
     if not parts:
         return ""
     first = parts[0].lower()
-    rest = "".join(word.title() for word in parts[1:])
+    rest = "".join(word.capitalize() for word in parts[1:] if word)
     return f"{first}{rest}"
 
 ############################################################
@@ -135,13 +148,16 @@ class Polynomial(object):
         return self.polynomial
 
     def __neg__(self):
-        return Polynomial(tuple((-coef, power) for (coef, power) in self.polynomial))
+        return Polynomial(
+            tuple((-coef, power) for (coef, power) in self.polynomial))
 
     def __add__(self, other):
         return Polynomial(self.polynomial + other.polynomial)
 
     def __sub__(self, other):
-        return Polynomial(self.polynomial + tuple((-coef, power) for (coef, power) in other.polynomial))
+        return Polynomial(
+            self.polynomial + tuple(
+                (-coef, power) for (coef, power) in other.polynomial))
 
     def __mul__(self, other):
         return Polynomial((coef * other_coef, pwr + other_pwr)
@@ -155,10 +171,16 @@ class Polynomial(object):
         terms = {}
         for coef, power in self.polynomial:
             terms[power] = terms.get(power, 0) + coef
-        simplified = [(coef, power) for power, coef in terms.items() if coef != 0]
+        simplified = [
+            (coef, power) for power, coef in terms.items() if coef != 0
+        ]
         if not simplified:
             simplified = [(0, 0)]
-        self.polynomial = tuple(sorted(simplified, key=lambda term: term[1], reverse=True))
+        self.polynomial = tuple(
+            sorted(
+                simplified, key=lambda term: term[1], reverse=True
+            )
+        )
 
     def __str__(self):
         parts = []
@@ -193,7 +215,8 @@ class Polynomial(object):
 def sort_array(list_of_matrices):
     if not list_of_matrices:
         return numpy.array([], dtype=int)
-    flattened = [numpy.array(matrix).reshape(-1) for matrix in list_of_matrices]
+    flattened = [numpy.array(matrix).reshape(-1)
+                 for matrix in list_of_matrices]
     merged = numpy.concatenate(flattened)
     return numpy.sort(merged)[::-1]
 
@@ -201,7 +224,8 @@ def sort_array(list_of_matrices):
 def POS_tag(sentence):
     stop_words = set(nltk.corpus.stopwords.words("english"))
     words = nltk.word_tokenize(sentence.lower())
-    words = [word for word in words if word not in stop_words and word not in string.punctuation]
+    words = [word for word in words
+             if word not in stop_words and word not in string.punctuation]
     return nltk.pos_tag(words)
 
 ############################################################
