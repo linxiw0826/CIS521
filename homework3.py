@@ -9,6 +9,7 @@
 # Include your imports here, if any are used.
 from collections import deque
 import heapq
+import math
 import random
 
 ############################################################
@@ -27,7 +28,7 @@ def create_tile_puzzle(rows, cols):
 
 
 class TilePuzzle(object):
-    
+
     # Required
     def __init__(self, board):
         self.board = [row[:] for row in board]
@@ -48,7 +49,8 @@ class TilePuzzle(object):
         nr, nc = r + dr, c + dc
         if not (0 <= nr < self.rows and 0 <= nc < self.cols):
             return False
-        self.board[r][c], self.board[nr][nc] = self.board[nr][nc], self.board[r][c]
+        self.board[r][c], self.board[nr][nc] = (
+            self.board[nr][nc], self.board[r][c])
         return True
 
     def scramble(self, num_moves):
@@ -56,7 +58,8 @@ class TilePuzzle(object):
             self.perform_move(random.choice(("up", "down", "left", "right")))
 
     def is_solved(self):
-        return sum(self.board, []) == list(range(1, self.rows * self.cols)) + [0]
+        goal = list(range(1, self.rows * self.cols)) + [0]
+        return sum(self.board, []) == goal
 
     def copy(self):
         return TilePuzzle(self.board)
@@ -80,7 +83,12 @@ class TilePuzzle(object):
                                           visited | {state})
         depth = 0
         while True:
-            yield from search(self, depth, [], {tuple(sum(self.board, []))})
+            solutions = list(search(self, depth, [],
+                                    {tuple(sum(self.board, []))}))
+            if solutions:
+                for solution in solutions:
+                    yield solution
+                return
             depth += 1
 
     # Required
@@ -126,22 +134,39 @@ def find_path(start, goal, scene):
             not (0 <= goal[0] < rows and 0 <= goal[1] < cols) or
             scene[start[0]][start[1]] or scene[goal[0]][goal[1]]):
         return None
-    queue = deque([start])
+
+    def distance(a, b):
+        return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+
+    directions = ((-1, -1), (-1, 0), (-1, 1), (0, -1),
+                  (0, 1), (1, -1), (1, 0), (1, 1))
+    heap = [(distance(start, goal), 0, 0, start)]
     parent = {start: None}
-    while queue:
-        current = queue.popleft()
+    best = {start: 0}
+    counter = 1
+    while heap:
+        _, cost, _, current = heapq.heappop(heap)
+        if cost != best[current]:
+            continue
         if current == goal:
             path = []
             while current is not None:
                 path.append(current)
                 current = parent[current]
             return path[::-1]
-        for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+        for dr, dc in directions:
             nxt = (current[0] + dr, current[1] + dc)
-            if (0 <= nxt[0] < rows and 0 <= nxt[1] < cols and
-                    not scene[nxt[0]][nxt[1]] and nxt not in parent):
+            if not (0 <= nxt[0] < rows and 0 <= nxt[1] < cols):
+                continue
+            if scene[nxt[0]][nxt[1]]:
+                continue
+            new_cost = cost + math.sqrt(dr * dr + dc * dc)
+            if new_cost < best.get(nxt, float("inf")):
+                best[nxt] = new_cost
                 parent[nxt] = current
-                queue.append(nxt)
+                counter += 1
+                priority = new_cost + distance(nxt, goal)
+                heapq.heappush(heap, (priority, new_cost, counter, nxt))
     return None
 
 ############################################################
@@ -151,12 +176,25 @@ def find_path(start, goal, scene):
 
 def solve_distinct_disks(length, n):
     start = tuple(range(n)) + (None,) * (length - n)
-    goal = (None,) * (length - n) + tuple(range(n))
-    queue = deque([start])
+    goal = (None,) * (length - n) + tuple(range(n - 1, -1, -1))
+    goal_positions = {disk: length - 1 - disk for disk in range(n)}
+
+    def heuristic(state):
+        total = 0
+        for i, disk in enumerate(state):
+            if disk is not None:
+                total += (abs(goal_positions[disk] - i) + 1) // 2
+        return total
+
+    heap = [(heuristic(start), 0, 0, start)]
     parent = {start: None}
     moves = {}
-    while queue:
-        state = queue.popleft()
+    best = {start: 0}
+    counter = 1
+    while heap:
+        _, cost, _, state = heapq.heappop(heap)
+        if cost != best[state]:
+            continue
         if state == goal:
             answer = []
             while parent[state] is not None:
@@ -175,10 +213,15 @@ def solve_distinct_disks(length, n):
                 child = list(state)
                 child[i], child[j] = child[j], child[i]
                 child = tuple(child)
-                if child not in parent:
+                new_cost = cost + 1
+                if new_cost < best.get(child, float("inf")):
+                    best[child] = new_cost
                     parent[child] = state
                     moves[child] = (i, j)
-                    queue.append(child)
+                    counter += 1
+                    priority = new_cost + heuristic(child)
+                    heapq.heappush(heap, (priority, new_cost,
+                                          counter, child))
     return None
 
 ############################################################
