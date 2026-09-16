@@ -7,7 +7,6 @@
 ############################################################
 
 # Include your imports here, if any are used.
-from collections import deque
 import heapq
 import math
 import random
