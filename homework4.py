@@ -91,7 +91,8 @@ class DominoesGame(object):
             moves = list(game.legal_moves(turn))
             if depth == 0 or not moves:
                 leaves[0] += 1
-                return len(moves) - len(list(game.legal_moves(not turn)))
+                return (len(list(game.legal_moves(vertical))) -
+                        len(list(game.legal_moves(not vertical))))
 
             maximizing = turn == vertical
             if maximizing:
@@ -144,11 +145,12 @@ class DominoesGame(object):
 
 # Just an approximation is fine.
 feedback_question_1 = """
-Implementing the minimax search with alpha-beta pruning. 
+Implementing the minimax search with alpha-beta pruning.
 """
 
 feedback_question_2 = """
-How game-playing ALG represent the state of a game and search through possible future moves.
+How game-playing algorithms represent the state of a game and search through
+possible future moves.
 """
 
 feedback_question_3 = """
