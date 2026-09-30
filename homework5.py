@@ -45,7 +45,8 @@ def read_board(path):
     with open(path, "r") as file:
         rows = [line.strip() for line in file if line.strip()]
     if len(rows) != 9 or any(len(row) != 9 for row in rows):
-        raise ValueError("A Sudoku board must contain nine rows of nine values")
+        raise ValueError(
+            "A Sudoku board must contain nine rows of nine values")
     for row, values in enumerate(rows):
         for col, value in enumerate(values):
             if value == "*" or value == "0":
@@ -98,7 +99,8 @@ class Sudoku(object):
             self.infer_ac3()
             for unit in self._units():
                 for value in range(1, 10):
-                    places = [cell for cell in unit if value in self.board[cell]]
+                    places = [cell for cell in unit
+                              if value in self.board[cell]]
                     if len(places) == 1:
                         self.board[places[0]] = {value}
             changed = before != self._state()
@@ -116,7 +118,8 @@ class Sudoku(object):
             self.board = copy.deepcopy(original)
             self.board[cell] = {value}
             self.infer_with_guessing()
-            if all(self.board[c] for c in self.CELLS) and self._is_valid_solution():
+            if (all(self.board[c] for c in self.CELLS)
+                    and self._is_valid_solution()):
                 return
         self.board = original
 
@@ -132,7 +135,8 @@ class Sudoku(object):
         return rows + cols + boxes
 
     def _state(self):
-        return tuple((cell, tuple(sorted(self.board[cell]))) for cell in self.CELLS)
+        return tuple((cell, tuple(sorted(self.board[cell])))
+                     for cell in self.CELLS)
 
     def _is_valid_solution(self):
         if any(len(self.board[cell]) != 1 for cell in self.CELLS):
@@ -147,11 +151,14 @@ class Sudoku(object):
 
 # Just an approximation is fine.
 feedback_question_1 = """
-The most challenging part was understanding how AC-3 propagates a change through the network of Sudoku constraints.  In particular, when a cell is reduced to one value, every neighboring cell must be reconsidered.
+    The most challenging part was understanding how AC-3 propagates a change
+    through the network of Sudoku constraints.  In particular, when a cell
+    is reduced to one value, every neighboring cell must be reconsidered.
 """
 
 feedback_question_2 = """
-I found the assignment helpful because it connected the abstract CSP ideas from class to a concrete problem.
+    I found the assignment helpful because it connected the abstract CSP ideas
+    from class to a concrete problem.
 """
 
 feedback_question_3 = """
