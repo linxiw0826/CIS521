@@ -51,7 +51,6 @@ class Agent:
         x, y = room
         return {(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)}
 
-
     def record_percepts(self, sensed_percepts, current_location):
         """Update the percepts in agent's KB with the percepts sensed in the
         current location, and update visited_rooms and all_rooms."""
@@ -69,7 +68,6 @@ class Agent:
             kb.bump[self.loc] = self.direction
         kb.gasp = Percept.GASP in present_percepts
         kb.scream = kb.scream or Percept.SCREAM in present_percepts
-
 
     @staticmethod
     def enumerate_possible_worlds(
@@ -107,7 +105,6 @@ class Agent:
                         worlds.add((pits, room))
         return worlds
 
-
     def pit_room_is_consistent_with_KB(self, pit_room: Optional[Room]) -> bool:
         """Return True if the room could be a pit given breeze in KB, False
         otherwise. A room could be a pit if all adjacent rooms that have been
@@ -117,10 +114,11 @@ class Agent:
         This will be used to find the model of the KB."""
         if pit_room is None:  # It is possible that there are no pits
             return not self.KB.breeze  # if no breeze has been perceived yet
-        return self.adjacent_rooms(pit_room) & self.KB.visited_rooms <= self.KB.breeze
+        return self.adjacent_rooms(
+            pit_room) & self.KB.visited_rooms <= self.KB.breeze
 
-
-    def wampa_room_is_consistent_with_KB(self, wampa_room: Optional[Room]) -> bool:
+    def wampa_room_is_consistent_with_KB(
+            self, wampa_room: Optional[Room]) -> bool:
         """Return True if the room could be a wampa given stench in KB, False
         otherwise. A room could be a wampa if all adjacent rooms that have
         been visited have had stench perceived in them.
@@ -133,8 +131,9 @@ class Agent:
         return (not self.KB.scream
                 and adjacent & self.KB.visited_rooms == self.KB.stench)
 
-
-    def find_model_of_KB(self, possible_worlds: Set[PossibleWorld]) -> Set[PossibleWorld]:
+    def find_model_of_KB(
+            self,
+            possible_worlds: Set[PossibleWorld]) -> Set[PossibleWorld]:
         """Return the subset of all possible worlds consistent with KB.
         possible_worlds is a set of tuples (pit_rooms, wampa_room),
         pit_rooms is a set of tuples of possible pit rooms,
@@ -145,13 +144,14 @@ class Agent:
         for pits, wampa in possible_worlds:
             if not self.wampa_room_is_consistent_with_KB(wampa):
                 continue
-            if not all(self.pit_room_is_consistent_with_KB(pit) for pit in pits):
+            if not all(self.pit_room_is_consistent_with_KB(pit)
+                       for pit in pits):
                 continue
             # Every observed breeze must have at least one adjacent pit.
-            if all(self.adjacent_rooms(room) & set(pits) for room in self.KB.breeze):
+            if all(self.adjacent_rooms(room) & set(pits)
+                   for room in self.KB.breeze):
                 models.add((pits, wampa))
         return models
-
 
     @staticmethod
     def find_model_of_query(
@@ -168,8 +168,9 @@ class Agent:
         }
         if query not in predicates:
             raise ValueError(f"Unknown query: {query}")
-        return {world for world in possible_worlds if predicates[query](*world)}
-
+        return {
+            world for world in possible_worlds if predicates[query](
+                *world)}
 
     def infer_wall_locations(self):
         """If a bump is perceived, infer wall locations along the entire known
@@ -215,7 +216,6 @@ class Agent:
         if kb.gasp:
             kb.luke = self.loc
 
-
     def backward_chaining_resolution(self):
         """
         Infer whether each adjacent room is safe, pit or wampa by
@@ -243,7 +243,8 @@ class Agent:
         for count in range(len(pit_candidates) + 1):
             for rooms in combinations(pit_candidates, count):
                 pits = frozenset(rooms)
-                if not all(self.adjacent_rooms(room) & pits for room in kb.breeze):
+                if not all(self.adjacent_rooms(room) &
+                           pits for room in kb.breeze):
                     continue
                 for wampa in wampas:
                     if wampa not in pits:
@@ -252,16 +253,21 @@ class Agent:
         if not models:
             return  # Inconsistent evidence must not entail every query.
         for room in kb.all_rooms - kb.walls:
-            entailed = {query: models <= self.find_model_of_query(query, room, worlds)
-                        for query in ("pit_in_room", "wampa_in_room",
-                                      "no_pit_in_room", "no_wampa_in_room")}
+            entailed = {
+                query: models <= self.find_model_of_query(
+                    query,
+                    room,
+                    worlds) for query in (
+                    "pit_in_room",
+                    "wampa_in_room",
+                    "no_pit_in_room",
+                    "no_wampa_in_room")}
             if entailed["pit_in_room"]:
                 kb.pits.add(room)
             if entailed["wampa_in_room"]:
                 kb.wampa = room
             if entailed["no_pit_in_room"] and entailed["no_wampa_in_room"]:
                 kb.safe_rooms.add(room)
-
 
     def inference_algorithm(self):
         """First, make some basic inferences
@@ -290,7 +296,6 @@ class Agent:
             safe_actions.append(Action.SHOOT)
         return safe_actions
 
-
     def choose_next_action(self) -> Action:
         """Choose next action from all safe next actions. You may want to
         prioritize some actions based on current state. For example, if R2D2
@@ -313,7 +318,8 @@ class Agent:
                    safe - self.KB.visited_rooms)
         if not self.has_luke and self.KB.luke is not None:
             targets = {self.KB.luke}
-        directions = [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]
+        directions = [Direction.UP, Direction.RIGHT,
+                      Direction.DOWN, Direction.LEFT]
         start = (self.loc, self.direction)
         queue = deque([(start, None)])
         seen = {start}
@@ -338,9 +344,9 @@ class Agent:
             for state, action in successors:
                 if state not in seen:
                     seen.add(state)
-                    queue.append((state, first if first is not None else action))
+                    queue.append(
+                        (state, first if first is not None else action))
         return Action.LEFT
-
 
 
 # Approximately how many hours did you spend on this assignment?
@@ -348,7 +354,9 @@ feedback_question_1 = """2 Hours"""
 
 # Which aspects of this assignment did you find most challenging?
 # Were there any significant stumbling blocks?
-feedback_question_2 = """Checking consistency between possible worlds and the KB."""
+feedback_question_2 = (
+    "Checking consistency between possible worlds and the KB."
+)
 
 # Which aspects of this assignment did you like?
 # Is there anything you would have changed?
