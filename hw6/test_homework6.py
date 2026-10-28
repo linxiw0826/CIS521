@@ -6,7 +6,7 @@ import random
 import sys
 import unittest
 
-import homework6 as agents
+import agents
 
 SKELETON = Path(__file__).resolve().parent / 'homework6_skeleton'
 spec = importlib.util.spec_from_file_location('gridworld',
@@ -199,8 +199,9 @@ class AgentTests(unittest.TestCase):
 
     def test_submission_matches_gui_agent(self):
         root = Path(__file__).resolve().parent.parent
-        self.assertEqual((root / 'homework6.py').read_text(),
-                         (SKELETON / 'agents.py').read_text())
+        submission = (root / 'agents.py').read_text()
+        self.assertEqual(submission, (root / 'homework6.py').read_text())
+        self.assertEqual(submission, (SKELETON / 'agents.py').read_text())
 
 
 if __name__ == '__main__':
